@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Interior AI – WhatsApp Mock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 360px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .header {
+      background: #075e54;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: #e5ddd5;
+    }
+
+    .message {
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      max-width: 80%;
+      font-size: 14px;
+    }
+
+    .user {
+      background: #dcf8c6;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #fff;
+      align-self: flex-start;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      gap: 5px;
+    }
+
+    input {
+      padding: 6px;
+      font-size: 14px;
+    }
+
+    #phone {
+      width: 40%;
+    }
+
+    #message {
+      flex: 1;
+    }
+
+    button {
+      padding: 6px 10px;
+      background: #075e54;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="header">Interior AI (WhatsApp Mock)</div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input-area">
+    <input id="phone" placeholder="Phone" />
+    <input id="message" placeholder="Type a message" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+async function sendMessage() {
+  const phone = document.getElementById("phone").value;
+  const message = document.getElementById("message").value;
+
+  if (!phone || !message) {
+    alert("Enter phone and message");
+    return;
+  }
+
+  addMessage(message, "user");
+  document.getElementById("message").value = "";
+
+  const res = await fetch("http://127.0.0.1:8000/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      session_id: phone,
+      message: message
+    })
+  });
+
+  const data = await res.json();
+  addMessage(data.reply, "bot");
+}
+
+function addMessage(text, type) {
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `message ${type}`;
+  msgDiv.innerText = text;
+
+  document.getElementById("messages").appendChild(msgDiv);
+  document.getElementById("messages").scrollTop =
+    document.getElementById("messages").scrollHeight;
+}
+</script>
+
+</body>
+</html>
