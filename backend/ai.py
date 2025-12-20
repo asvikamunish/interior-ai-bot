@@ -8,7 +8,7 @@ def get_ai_reply(message: str, context: dict):
         system_prompt = "You are an expert interior designer."
 
         response = client.chat.completions.create(
-            model="llama3-8b-8192",  # ✅ FIXED MODEL
+            model="llama-3.1-8b-instant",  # ✅ FIXED MODEL
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
