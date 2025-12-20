@@ -84,3 +84,4 @@ def chat(request: ChatRequest):
 
     session["last_active"] = datetime.utcnow()
 
+
