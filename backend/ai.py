@@ -1,47 +1,33 @@
 import os
-from dotenv import load_dotenv
 from groq import Groq
 
-# Load environment variables
-load_dotenv()
-
+# Read API key from environment
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY not found in backend/.env")
+    raise RuntimeError("GROQ_API_KEY not found in environment variables")
 
 client = Groq(api_key=GROQ_API_KEY)
 
-SYSTEM_PROMPT = """
-You are Aira, a professional interior designer.
-You speak politely, clearly, and naturally.
-You ask clarifying questions when the input is vague.
-Provide practical and realistic interior design suggestions.
-"""
 
-def get_ai_reply(user_message: str, context: dict = None) -> str:
+def get_ai_reply(message: str, context: dict):
     try:
-        context_text = ""
+        system_prompt = "You are an expert interior designer AI."
 
-        if context and len(context) > 0:
-            details = []
-            for key, value in context.items():
-                details.append(f"{key}: {value}")
-            context_text = (
-                "Known user preferences so far: "
-                + ", ".join(details)
-                + ". Use this information naturally in your response."
-            )
+        if "room" in context:
+            system_prompt += f" The room is a {context['room']}."
+        if "style" in context:
+            system_prompt += f" Style preference: {context['style']}."
+        if "budget" in context:
+            system_prompt += f" Budget info: {context['budget']}."
 
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="llama3-70b-8192",
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "system", "content": context_text},
-                {"role": "user", "content": user_message}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
             ],
-            temperature=0.7,
-            max_tokens=300
+            temperature=0.7
         )
 
         return response.choices[0].message.content
