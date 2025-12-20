@@ -1,19 +1,26 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from ai import get_ai_reply
 from datetime import datetime
 from fastapi.responses import FileResponse
+import os
+
+from ai import get_ai_reply
 
 app = FastAPI()
 
-# --------------------------------
+# --------------------------------------------------
+# Base directory (IMPORTANT for Render)
+# --------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# --------------------------------------------------
 # In-memory session storage
-# --------------------------------
+# --------------------------------------------------
 sessions = {}
 
-# --------------------------------
+# --------------------------------------------------
 # Context extraction helper
-# --------------------------------
+# --------------------------------------------------
 def extract_context(message: str, context: dict):
     msg = message.lower()
 
@@ -37,16 +44,16 @@ def extract_context(message: str, context: dict):
 
     return context
 
-# --------------------------------
+# --------------------------------------------------
 # Request model
-# --------------------------------
+# --------------------------------------------------
 class ChatRequest(BaseModel):
     session_id: str
     message: str
 
-# --------------------------------
+# --------------------------------------------------
 # Routes
-# --------------------------------
+# --------------------------------------------------
 @app.get("/")
 def read_root():
     return {"message": "Interior AI backend is running"}
@@ -72,10 +79,10 @@ def chat(request: ChatRequest):
         "content": user_message
     })
 
-    # Extract and update context
+    # Extract context
     session["context"] = extract_context(user_message, session["context"])
 
-    # Get AI reply with context
+    # Get AI reply
     ai_reply = get_ai_reply(user_message, session["context"])
 
     # Store AI reply
@@ -96,9 +103,9 @@ def chat(request: ChatRequest):
         }
     }
 
-# --------------------------------
+# --------------------------------------------------
 # Admin APIs
-# --------------------------------
+# --------------------------------------------------
 @app.get("/admin/sessions")
 def get_sessions():
     return {
@@ -116,13 +123,13 @@ def get_session_details(session_id: str):
         return {"error": "Session not found"}
     return sessions[session_id]
 
-@app.get("/admin")
-def admin_dashboard():
-    return FileResponse("admin.html")
-
-# --------------------------------
-# Mock WhatsApp UI
-# --------------------------------
+# --------------------------------------------------
+# UI ROUTES (FIXED)
+# --------------------------------------------------
 @app.get("/chat-ui")
 def chat_ui():
-    return FileResponse("chat.html")
+    return FileResponse(os.path.join(BASE_DIR, "chat.html"))
+
+@app.get("/admin")
+def admin_dashboard():
+    return FileResponse(os.path.join(BASE_DIR, "admin.html"))
