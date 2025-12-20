@@ -82,4 +82,5 @@ def chat(request: ChatRequest):
         "content": ai_reply
     })
 
-    session["last_active"]_]()
+    session["last_active"] = datetime.utcnow()
+
